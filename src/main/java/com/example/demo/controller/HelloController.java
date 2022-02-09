@@ -1,8 +1,11 @@
 package com.example.demo.controller;
 
 import com.example.demo.bean.Car;
+import com.example.demo.common.JedisCommand;
 import com.example.demo.mapper.primary.CarMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,11 +19,25 @@ public class HelloController {
     @Autowired
     private CarMapper carMapper;
 
+    @Autowired
+    private JedisCommand jedisCommand;
+
     @RequestMapping("/")
     public String index() {
 
         Car car =  carMapper.search("别摸我",null).iterator().next();
         return "Greetings from Spring Boot!" + car;
+    }
+
+    @GetMapping("/setnx/{key}/{val}")
+    public boolean setnx(@PathVariable String key, @PathVariable String val) {
+        return jedisCommand.setnx(key, val);
+    }
+
+
+    @GetMapping("/delnx/{key}/{val}")
+    public int delnx(@PathVariable String key, @PathVariable String val) {
+        return jedisCommand.delnx(key, val);
     }
 
 

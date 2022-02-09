@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.DefaultRedisCachePrefix;
 import org.springframework.data.redis.cache.RedisCacheManager;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -19,6 +18,8 @@ import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
@@ -72,14 +73,33 @@ public class RedisConfig {
 
         return template;
     }
+//    @Bean
+//    JedisPool jedisPool(){
+//        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+//        // 设置最大10个连接
+//        jedisPoolConfig.setMaxTotal(600);
+//        jedisPoolConfig.setMaxIdle(300);
+//        jedisPoolConfig.setTestOnBorrow(true);
+//        jedisPoolConfig.setTestOnReturn(false);
+//        JedisPool pool = new JedisPool(jedisPoolConfig, "10.105.141.164",16379,1000,"redis123");
+//        return pool;
+//    }
 
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
         JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory();
+        //RedisConnectionFactory设置host-name，port，password都正确了，就没Connection failure occurred. Restarting subscription task 这个问题。
         jedisConnectionFactory.setHostName("10.105.141.164");
         jedisConnectionFactory.setPort(16379);
         jedisConnectionFactory.setPassword("redis123");
-        //RedisConnectionFactory设置host-name，port，password都正确了，就没Connection failure occurred. Restarting subscription task 这个问题。
+
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+//        // 设置最大10个连接
+        jedisPoolConfig.setMaxTotal(600);
+        jedisPoolConfig.setMaxIdle(300);
+        jedisPoolConfig.setTestOnBorrow(true);
+        jedisPoolConfig.setTestOnReturn(false);
+        jedisConnectionFactory.setPoolConfig(jedisPoolConfig);
         return jedisConnectionFactory;
     }
 
