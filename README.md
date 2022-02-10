@@ -339,12 +339,11 @@ public int delnx(@PathVariable String key, @PathVariable String val) {
 
 [参考这篇文章](https://mistray.github.io/2020/08/21/Jedis%E8%BF%9E%E6%8E%A5%E6%B1%A0%E7%AB%9F%E7%84%B6%E4%BC%9A%E8%B5%84%E6%BA%90%E6%B3%84%E9%9C%B2/)
 
-最终原因终于找到了, 查看源码`Jedis 2.9.3` 的Jedis.class:
+最终原因终于找到了, 查看源码`Jedis 2.9.0` 的Jedis.class:
 
     public void close() {
         if (this.dataSource != null) {
             JedisPoolAbstract pool = this.dataSource;
-            this.dataSource = null;
             if (this.client.isBroken()) {
                 pool.returnBrokenResource(this);
             } else {
