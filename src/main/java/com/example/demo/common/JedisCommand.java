@@ -7,17 +7,27 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.params.SetParams;
 
 @Component
 @Slf4j
 public class JedisCommand {
 
+//    @Autowired
+//    private JedisConnectionFactory jedisConnectionFactory;
+
     @Autowired
-    private JedisConnectionFactory jedisConnectionFactory;
+    private JedisPool jedisPool;
+
+
+//    private Jedis getJedis() {
+//        JedisConnection  jedisConnection = (JedisConnection)jedisConnectionFactory.getConnection();
+//        return jedisConnection.getNativeConnection();
+//    }
 
     private Jedis getJedis() {
-        JedisConnection  jedisConnection = (JedisConnection)jedisConnectionFactory.getConnection();
-        return jedisConnection.getNativeConnection();
+        return jedisPool.getResource();
     }
 
     public boolean setnx(String key, String val) {
@@ -26,7 +36,8 @@ public class JedisCommand {
             if (jedis == null) {
                 return false;
             }
-            String ret = jedis.set(key, val, "NX", "PX", 1000 * 60);
+            SetParams setParams = SetParams.setParams().nx().px(1000 * 60);
+            String ret = jedis.set(key, val, setParams);
             if (StringUtils.isEmpty(ret)){
                 return false;
             }else

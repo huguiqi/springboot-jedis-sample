@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,12 +38,14 @@ public class RedisApplicationTests {
 	@Test
 	public void testAdd() {
 		redisTemplate.opsForValue().set("keyId","123456");
+		String result = redisTemplate.opsForValue().get("keyId");
+		Assert.hasText(result,"result 应该有值,但不知为何没取到");
 	}
 
 	@Test
 	public void testQuery(){
 
-		System.out.printf("redis get:"+redisTemplate.opsForValue().get("keyId2"));
+		System.out.printf("redis get:"+redisTemplate.opsForValue().get("keyId"));
 	}
 
 	@Test

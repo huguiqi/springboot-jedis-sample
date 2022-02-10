@@ -9,8 +9,10 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.cache.DefaultRedisCachePrefix;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -22,6 +24,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -52,12 +55,10 @@ public class RedisConfig {
 
     @SuppressWarnings("rawtypes")
     @Bean
-    public CacheManager cacheManager(RedisTemplate redisTemplate) {
-        RedisCacheManager rcm = new RedisCacheManager(redisTemplate);
-        rcm.setDefaultExpiration(60);
-        rcm.setUsePrefix(true);
-        rcm.setCachePrefix(new DefaultRedisCachePrefix("HGQ_"));
-        return rcm;
+    public CacheManager cacheManager(JedisConnectionFactory jedisConnectionFactory) {
+        RedisCacheConfiguration config =  RedisCacheConfiguration.defaultCacheConfig().computePrefixWith(cacheName-> "HGQ_"+cacheName).entryTtl(Duration.ofSeconds(60));
+        RedisCacheManager cacheManager =  RedisCacheManager.builder(jedisConnectionFactory).cacheDefaults(config).build();
+        return cacheManager;
     }
 
     @Bean
@@ -73,33 +74,45 @@ public class RedisConfig {
 
         return template;
     }
-//    @Bean
-//    JedisPool jedisPool(){
-//        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-//        // 设置最大10个连接
-//        jedisPoolConfig.setMaxTotal(600);
-//        jedisPoolConfig.setMaxIdle(300);
-//        jedisPoolConfig.setTestOnBorrow(true);
-//        jedisPoolConfig.setTestOnReturn(false);
-//        JedisPool pool = new JedisPool(jedisPoolConfig, "10.105.141.164",16379,1000,"redis123");
-//        return pool;
-//    }
 
     @Bean
-    JedisConnectionFactory jedisConnectionFactory() {
-        JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory();
-        //RedisConnectionFactory设置host-name，port，password都正确了，就没Connection failure occurred. Restarting subscription task 这个问题。
-        jedisConnectionFactory.setHostName("10.105.141.164");
-        jedisConnectionFactory.setPort(16379);
-        jedisConnectionFactory.setPassword("redis123");
-
+    JedisPool jedisPool(){
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-//        // 设置最大10个连接
-        jedisPoolConfig.setMaxTotal(600);
-        jedisPoolConfig.setMaxIdle(300);
+        // 设置最大15个连接
+        jedisPoolConfig.setMaxTotal(15);
+        jedisPoolConfig.setMaxIdle(15);
+        jedisPoolConfig.setMinIdle(10);
         jedisPoolConfig.setTestOnBorrow(true);
         jedisPoolConfig.setTestOnReturn(false);
-        jedisConnectionFactory.setPoolConfig(jedisPoolConfig);
+        JedisPool pool = new JedisPool(jedisPoolConfig, "10.105.141.164",16379,1000,"redis123");
+        return pool;
+    }
+
+    /**
+     * jedisConnectionFactory是给redisTemplate实例提供的工厂类
+     * @return
+     */
+    @Bean
+    JedisConnectionFactory jedisConnectionFactory() {
+
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        // 设置最大20个连接
+        jedisPoolConfig.setMaxTotal(20);
+        jedisPoolConfig.setMaxIdle(20);
+        jedisPoolConfig.setMinIdle(8);
+        jedisPoolConfig.setTestOnBorrow(true);
+        jedisPoolConfig.setTestOnReturn(false);
+
+        JedisClientConfiguration.JedisPoolingClientConfigurationBuilder jpcf = (JedisClientConfiguration.JedisPoolingClientConfigurationBuilder) JedisClientConfiguration.builder();
+        jpcf.poolConfig(jedisPoolConfig);
+        JedisClientConfiguration jedisClientConfiguration = jpcf.build();
+
+        RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
+        redisStandaloneConfiguration.setHostName("10.105.141.164");
+        redisStandaloneConfiguration.setPort(16379);
+        redisStandaloneConfiguration.setPassword("redis123");
+        JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(redisStandaloneConfiguration,jedisClientConfiguration);
+        //RedisConnectionFactory设置host-name，port，password都正确了，就没Connection failure occurred. Restarting subscription task 这个问题。
         return jedisConnectionFactory;
     }
 
