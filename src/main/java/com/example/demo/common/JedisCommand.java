@@ -2,8 +2,6 @@ package com.example.demo.common;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.connection.jedis.JedisConnection;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import redis.clients.jedis.Jedis;
@@ -14,17 +12,9 @@ import redis.clients.jedis.params.SetParams;
 @Slf4j
 public class JedisCommand {
 
-//    @Autowired
-//    private JedisConnectionFactory jedisConnectionFactory;
-
     @Autowired
     private JedisPool jedisPool;
 
-
-//    private Jedis getJedis() {
-//        JedisConnection  jedisConnection = (JedisConnection)jedisConnectionFactory.getConnection();
-//        return jedisConnection.getNativeConnection();
-//    }
 
     private Jedis getJedis() {
         return jedisPool.getResource();
@@ -77,7 +67,6 @@ public class JedisCommand {
    }
     return 0;
     }
-
 
 
 }

@@ -478,6 +478,7 @@ JedisCommand.java修改：
 正确使用jedis：
     1. jedis即用即取,用完就关
     2. jedis实例不可作为共享变量来使用,调用close后，无法重连获取连接
+    3. jedis实例其实就是JedisPool中的客户端连接，不应该为作共享变量来使用
 
 总结下来解决方案：
 

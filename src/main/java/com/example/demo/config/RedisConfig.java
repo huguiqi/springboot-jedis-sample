@@ -67,7 +67,7 @@ public class RedisConfig {
         Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
         ObjectMapper om = new ObjectMapper();
         om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+        om.activateDefaultTyping(om.getPolymorphicTypeValidator(),ObjectMapper.DefaultTyping.NON_FINAL);
         jackson2JsonRedisSerializer.setObjectMapper(om);
         template.setValueSerializer(jackson2JsonRedisSerializer);
         template.afterPropertiesSet();
@@ -79,9 +79,9 @@ public class RedisConfig {
     JedisPool jedisPool(){
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         // 设置最大15个连接
-        jedisPoolConfig.setMaxTotal(15);
-        jedisPoolConfig.setMaxIdle(15);
-        jedisPoolConfig.setMinIdle(10);
+        jedisPoolConfig.setMaxTotal(400);
+        jedisPoolConfig.setMaxIdle(400);
+        jedisPoolConfig.setMinIdle(200);
         jedisPoolConfig.setTestOnBorrow(true);
         jedisPoolConfig.setTestOnReturn(false);
         JedisPool pool = new JedisPool(jedisPoolConfig, "10.105.141.164",16379,1000,"redis123");
