@@ -35,6 +35,7 @@ public class MiaoShaController {
     @GetMapping("/qiangdan")
     public List<String> qiangdan() {
 
+        Long startTime = System.currentTimeMillis();
         //抢到商品的用户
         List<String> shopUsers = new ArrayList<>();
 
@@ -55,6 +56,7 @@ public class MiaoShaController {
             }
         });
 
+        System.out.println("秒杀完成使用时间:"+ (System.currentTimeMillis() - startTime) + "ms");
         return shopUsers;
     }
 
