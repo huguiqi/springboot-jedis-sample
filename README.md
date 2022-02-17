@@ -13,6 +13,15 @@
 
 ## Jedis的nx生成锁
 
+> 原理
+
+**setnx** 命令是redis的一条原生命令
+ 大意为 **set if not exists**， 在指定的key不存在的情况下，为key设置值
+ 使用如下
+        
+```shell
+redis 127.0.0.1:6379> SETNX KEY_NAME VALUE
+```
 
 
 如何删除锁
